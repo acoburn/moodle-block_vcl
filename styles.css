@@ -1,0 +1,91 @@
+.block_vcl .content {
+    border-bottom-left-radius:0px;
+    border-bottom-right-radius:0px;
+    font-size:12px;
+}
+
+.block_vcl .content input[type='button'] {
+    cursor:pointer;
+}
+
+.block_vcl .content .throbber {
+    display:block;
+    margin:30px auto;
+}
+
+.block_vcl .content h3 {
+    text-align:center !important;
+    border-top:1px solid #639;
+    border-bottom:1px solid #639;
+}
+
+.block_vcl div.alt_connection {
+    display:none !important;
+}
+.block_vcl .active {
+    padding-left: 10px;
+    text-decoration:none;
+    background: url(../blocks/vcl/images/open.gif) no-repeat left center;
+}
+.block_vcl .inactive {
+    padding-left: 10px;
+    text-decoration:none;
+    background: url(../blocks/vcl/images/closed.gif) no-repeat left center;
+}
+.block_vcl a.active:hover,
+.block_vcl a.inactive:hover {
+    text-decoration:underline;
+}
+
+#vclNew {
+    display:none;
+}
+
+#vclTimeContainer {
+    display:none; 
+    position:relative; 
+    margin:5px 0;
+}
+
+#vclTimeContainer table td {
+    padding:2px 1px 1px 1px;
+    width:130px;
+}
+
+#vclTimeContainer table td:first-child {
+    width:auto;
+    font-size:10px;
+    padding:1px;
+}
+
+#vclCalContainer {
+    display:none; 
+    position:relative; 
+    margin-top:3px;
+}
+
+#vclTimeContainerHour {
+    overflow:visible;
+    background:url(../blocks/vcl/images/bar.gif) no-repeat center center;
+}
+
+#vclTimeContainerMinute {
+    overflow:visible;
+    background:url(../blocks/vcl/images/bar.gif) no-repeat center center;
+}
+
+#vclDateSelector {
+    display:none;
+    padding-bottom:8px;
+}
+
+#vclNew a {
+    text-decoration:underline;
+}
+#vclHelp {
+    padding: 2px;
+    text-align:center;
+}
+#vclHelp a {
+    text-decoration:underline;
+}
