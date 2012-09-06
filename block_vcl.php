@@ -371,7 +371,7 @@ class block_vcl extends block_base {
 
                 $existing_images = array();
                 if($images = $vcl->getGroupImages($imageGroup)){
-                    foreach($vcl->getGroupImages($imageGroup) as $image){
+                    foreach($images as $image){
                         $existing_images[$image['id']] = $image['name'];
                     }
                 } else {
