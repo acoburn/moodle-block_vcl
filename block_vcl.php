@@ -215,7 +215,9 @@ class block_vcl extends block_base {
                             }
                         }
                         if(!$courseNode){
-                            $courseNode = $vcl->addNode($courseName, $parentNode);
+                            if(!$courseNode = $vcl->addNode($courseName, $parentNode)){
+                                vcl_error("Could not add course node $courseName at $parentNode: {$vcl->errmsg}");
+                            }
                         }
                         if($courseNode){
                             if(!$vcl->addUserGroup(
@@ -228,14 +230,14 @@ class block_vcl extends block_base {
                                 get_config('block_vcl', 'reservationextension'),
                                 2
                             )){
-                                error_log($vcl->errmsg);
+                                vcl_error("Could not add user group: {$courseName}: {$vcl->errmsg}");
                             }
                             if(!$vcl->addResourceGroup(
                                 $this->vclImageGroup(),
                                 get_config('block_vcl', 'moodlegroup'),
                                 "image"
                             )){
-                                error_log($vcl->errmsg);
+                                vcl_error("Could not add resource group: {$vcl->errmsg}");
                             }
                             if(!$vcl->addUserGroupPriv(
                                 $courseName,
@@ -243,21 +245,21 @@ class block_vcl extends block_base {
                                 $courseNode,
                                 array("imageCheckOut")
                             )){
-                                error_log($vcl->errmsg);
+                                vcl_error("Error setting user group privileges: {$vcl->errmsg}");
                             } 
                             if(!$vcl->addImageGroupToComputerGroup(
                                 $this->vclImageGroup(),
                                 get_config('block_vcl', 'moodlecomputers')
                             )){
-                                error_log($vcl->errmsg);
+                                vcl_error("Error mapping image to computer group: {$vcl->errmsg}");
                             }
-                            if($vcl->addResourceGroupPriv(
+                            if(!$vcl->addResourceGroupPriv(
                                 $this->vclImageGroup(),
                                 "image",
                                 $courseNode,
                                 array("available")
                             )){
-                                error_log($vcl->errmsg);
+                                vcl_error("Error adding resource group privilege: {$vcl->errmsg}");
                             }
                             $users = array();
                             foreach(get_enrolled_users($this->context) as $user){
@@ -271,14 +273,18 @@ class block_vcl extends block_base {
                                     get_config('block_vcl', 'moodleaffil'),
                                     $users
                                 )){
-                                    error_log($vcl->errmsg . ": " . $vcl->message);
+                                    vcl_error("Error adding users to group: {$vcl->errmsg}, {$vcl->message}");
                                 }
                             }
                         }
+                    } else {
+                        vcl_error("Could not find privilege node: " . get_config('block_vcl', 'vclprivnode'));
                     }
+                } else {
+                    vcl_error("Could not retrieve node: " . $vcl->errmsg);
                 }
             } else {
-                // not all required values present
+                vcl_error("Not all required configuration values present");
             }
         }
         return true;
@@ -312,20 +318,30 @@ class block_vcl extends block_base {
                             }
                         }
                         if($courseNode){
-                           $vcl->removeNode($courseNode);
+                            if(!$vcl->removeNode($courseNode)){
+                                vcl_error("Could not remove privilege node: {$vcl->errmsg}");
+                            }
                         }
+                    } else {
+                        vcl_error("Could not find privilege node: " . get_config('block_vcl', 'vclprivnode'));
                     }
-                    $vcl->removeUserGroup(
+                    if(!$vcl->removeUserGroup(
                         $courseName,
                         get_config('block_vcl', 'moodleaffil')
-                    );
-                    $vcl->removeResourceGroup(
+                    )){
+                        vcl_error("Could not remove user group: {$vcl->errmsg}");
+                    }
+                    if(!$vcl->removeResourceGroup(
                         $this->vclImageGroup(),
                         "image"
-                    );
+                    )){
+                        vcl_error("Could not remove resource group: {$vcl->errmsg}");
+                    }
+                } else {
+                    vcl_error("Could not retrieve privilege nodes: {$vcl->errmsg}");
                 }
             } else {
-                // not all required values available
+                vcl_error("Not all required configuration values present");
             }
         }
         return true;
@@ -351,23 +367,29 @@ class block_vcl extends block_base {
                 $imageGroup = $this->vclImageGroup();
 
                 $existing_images = array();
-                foreach($vcl->getGroupImages($imageGroup) as $image){
-                    $existing_images[$image['id']] = $image['name'];
+                if($images = $vcl->getGroupImages($imageGroup)){
+                    foreach($vcl->getGroupImages($imageGroup) as $image){
+                        $existing_images[$image['id']] = $image['name'];
+                    }
+                } else {
+                    vcl_error("Error retrieving images from $imageGroup: {$vcl->errmsg}");
                 }
                 foreach($data as $id => $value){
                     if(preg_match("/^image_(\d+)$/", $id, $matches)){
                         $id = $matches[1];
                         if(!$value && array_key_exists($id, $existing_images)){
-                            $vcl->removeImageFromGroup($imageGroup, $id);
+                            if(!$vcl->removeImageFromGroup($imageGroup, $id)){
+                                vcl_error("Error removing image from group: $imageGroup: {$vcl->errmsg}");
+                            }
                         } else if($value && !array_key_exists($id, $existing_images)){
                             if(!$vcl->addImageToGroup($imageGroup, $id)){
-                                error_log($vcl->errmsg);
+                                vcl_error("Error adding image to group: $imageGroup: {$vcl->errmsg}");
                             }
                         }
                     }
                 }
             } else {
-                // arguments not all available.
+                vcl_error("Not all required configuration values present");
             }
         }
         return parent::instance_config_save($data);
@@ -403,6 +425,8 @@ class block_vcl extends block_base {
                         foreach($vclmembers as $member){
                             array_push($vclusers, $member);
                         }
+                    } else {
+                        vcl_error("Could not retrieve members from {$group}@{$affiliation}: {$vcl->errmsg}");
                     }
 
                     $moodleusers = array();
@@ -414,22 +438,28 @@ class block_vcl extends block_base {
 
                     $add = array_diff($moodleusers, $vclusers);
                     if(count($add)){
-                        $vcl->addUsersToGroup(
+                        if(!$vcl->addUsersToGroup(
                             $block->vclUserGroup(),
                             get_config('block_vcl', 'moodleaffil'),
                             $add
-                        );
+                        )){
+                            vcl_error("Error adding users to group: " . $block->vclUserGroup() . ": {$vcl->errmsg}");
+                        }
                     }
                     
                     $remove = array_diff($vclusers, $moodleusers);
                     if(count($remove)){
-                        $vcl->removeUsersFromGroup(
+                        if(!$vcl->removeUsersFromGroup(
                             $block->vclUserGroup(),
                             get_config('block_vcl', 'moodleaffil'),
                             $remove
-                        );
+                        )){
+                            vcl_error("Error removing users from group: " . $block->vclUserGroup() . ": {$vcl->errmsg}");
+                        }
                     }
                 }
+            } else {
+                vcl_error("Not all required configuration values present");
             }
         }
         return true;
@@ -457,16 +487,6 @@ class block_vcl extends block_base {
      *  block instance
      */
     public function vclImageGroup(){
-        $name = $this->context->get_course_context()->get_context_name(false, true);
-        if(strlen($name) > 30){
-            $name = preg_replace("/^((?:\w+\s+){2}).+\s([^\s]+)$/", "\\1\\2", $name);
-        }
-        if(strlen($name) > 30){
-            $name = preg_replace("/^(\w+\s+).+\s([^\s]+)$/", "\\1\\2", $name);
-        }
-        if(strlen($name) > 30){
-            $name = preg_replace("/\s([^\s]+)$/", "\\1", $name);
-        }
-        return vcl_node_clean($name . " Images");
+        return $this->vclUserGroup() . " Images";
     }
 }
