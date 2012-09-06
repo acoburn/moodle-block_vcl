@@ -55,8 +55,8 @@ class block_vcl extends block_base {
             return $this->content;
         }
 
-        if (!isloggedin() or isguestuser()) {
-            return ''; // Never useful unless you are logged in as a real user
+        if(!has_capability('block/vcl:reservation', $this->context)){
+            return ''; // Block isn't useful unless the user can make reservations
         }
 
         $this->content = new stdClass;
@@ -90,6 +90,9 @@ class block_vcl extends block_base {
         $this->content->text .= "          <select id=\"vclWhen\" name=\"when\">\n";
         $this->content->text .= "            <option selected=\"selected\">" . get_string('now', 'block_vcl') . "</option>\n";
         $this->content->text .= "            <option>" . get_string('later', 'block_vcl') . "</option>\n";
+        if(has_capability('block/vcl:blockallocation', $this->context)){
+            // stub for block allocation option
+        }
         $this->content->text .= "          </select>\n";
         $this->content->text .= "        </p>\n";
         $this->content->text .= "        <div id=\"vclDateSelector\">\n";
