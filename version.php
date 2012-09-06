@@ -32,5 +32,5 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2012090500;
+$plugin->version = 2012090600;
 $plugin->cron = 1800; // every 30 minutes
