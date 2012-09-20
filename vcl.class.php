@@ -272,6 +272,7 @@ class VCL {
         }
     }
 
+
 /**
  *  Function getUserGroups
  *
@@ -288,6 +289,7 @@ class VCL {
             }
         }
     }
+
 
 /**
  *  Function addUsersToGroup
@@ -315,6 +317,35 @@ class VCL {
             }
         }
     }
+
+
+/**
+ *  Function removeUsersFromGroup
+ *
+ *  Remove user accounts from an existing user group
+ *
+ *  @param string $group
+ *      The name of the group from which users will be removed
+ *  @param string $affiliation
+ *      The group's affiliation
+ *  @param array $users
+ *      An array of usernames to remove
+ *
+ *  @returns bool
+ *      Returns true on success
+ */ 
+    public function removeUsersFromGroup($group, $affiliation, $users){
+        if($response = $this->rpc("XMLRPCremoveUsersFromGroup", array($group, $affiliation, $users))){
+            if($response["status"] == "success"){
+                return 1;
+            } else if($response["status"] == "warning"){
+                $this->message = "The following users were not removed: " . implode(', ', $response['failedusers']);
+                $this->errcode = $response['warningcode'];
+                $this->errmsg = $response['warningmsg'];
+            }
+        }
+    }
+
 
 /**
  *  Function extendReservation
