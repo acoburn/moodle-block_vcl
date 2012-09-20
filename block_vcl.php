@@ -424,6 +424,8 @@ class block_vcl extends block_base {
                     );
 
                     $vclusers = array();
+                    $group = $block->vclUserGroup();
+                    $affiliation = get_config('block_vcl', 'moodleaffil');
                     if($vclmembers = $vcl->getUserGroupMembers($group, $affiliation)){
                         foreach($vclmembers as $member){
                             array_push($vclusers, $member);
@@ -442,22 +444,22 @@ class block_vcl extends block_base {
                     $add = array_diff($moodleusers, $vclusers);
                     if(count($add)){
                         if(!$vcl->addUsersToGroup(
-                            $block->vclUserGroup(),
-                            get_config('block_vcl', 'moodleaffil'),
+                            $group,
+                            $affiliation,
                             $add
                         )){
-                            vcl_error("Error adding users to group: " . $block->vclUserGroup() . ": {$vcl->errmsg}");
+                            vcl_error("Error adding users to group: {$group}: {$vcl->errmsg}");
                         }
                     }
                     
                     $remove = array_diff($vclusers, $moodleusers);
                     if(count($remove)){
                         if(!$vcl->removeUsersFromGroup(
-                            $block->vclUserGroup(),
-                            get_config('block_vcl', 'moodleaffil'),
+                            $group,
+                            $affiliation,
                             $remove
                         )){
-                            vcl_error("Error removing users from group: " . $block->vclUserGroup() . ": {$vcl->errmsg}");
+                            vcl_error("Error removing users from group: {$group}: {$vcl->errmsg}");
                         }
                     }
                 }
