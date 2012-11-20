@@ -355,7 +355,7 @@ class block_vcl extends block_base {
      *  This is particularly useful for immediately adding a course roster
      *  to a selected VCL group.
      */
-    public function instance_config_save($data) {
+    public function instance_config_save($data, $nolongerused = false) {
         if(get_config('block_vcl', 'api') &&
                get_config('block_vcl', 'enablecoursegroup')){
            if(get_config('block_vcl', 'moodleuser') &&
