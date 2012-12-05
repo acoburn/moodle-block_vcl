@@ -92,7 +92,7 @@ function vcl_get_username($user=NULL){
 }
 
 function vcl_error($message){
-    error_log("moodle-block_vcl: $mesage");
+    error_log("moodle-block_vcl: $message");
 }
 
 /** 
