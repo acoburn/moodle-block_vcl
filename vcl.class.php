@@ -57,6 +57,7 @@ class VCL {
         $this->api = $api;
         $this->username = $username;
         $this->password = $password;
+        error_log("VCL auth: $username, $password");
     }
 
 

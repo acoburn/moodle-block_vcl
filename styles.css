@@ -25,12 +25,12 @@
 .block_vcl .active {
     padding-left: 10px;
     text-decoration:none;
-    background: url(../blocks/vcl/images/open.gif) no-repeat left center;
+    background: url([[pix:block_vcl|open]]) no-repeat left center;
 }
 .block_vcl .inactive {
     padding-left: 10px;
     text-decoration:none;
-    background: url(../blocks/vcl/images/closed.gif) no-repeat left center;
+    background: url([[pix:block_vcl|closed]]) no-repeat left center;
 }
 .block_vcl a.active:hover,
 .block_vcl a.inactive:hover {
@@ -66,12 +66,12 @@
 
 #vclTimeContainerHour {
     overflow:visible;
-    background:url(../blocks/vcl/images/bar.gif) no-repeat center center;
+    background:url([[pix:block_vcl|bar]]) no-repeat center center;
 }
 
 #vclTimeContainerMinute {
     overflow:visible;
-    background:url(../blocks/vcl/images/bar.gif) no-repeat center center;
+    background:url([[pix:block_vcl|bar]]) no-repeat center center;
 }
 
 #vclDateSelector {

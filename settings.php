@@ -61,6 +61,17 @@ $settings->add(
         40
     ));
 
+$settings->add(
+    new admin_setting_configselect(
+        'block_vcl/authmethod',
+        get_string('labelauthmethod', 'block_vcl'),
+        get_string('descauthmethod', 'block_vcl'), '',
+        array(
+            "delegated" => "Shibboleth (i.e. delegated authentication)",
+            "internal" => "LDAP"
+        )
+    ));
+
 // Setting for VCL API password
 $settings->add(
     new admin_setting_configpasswordunmask(

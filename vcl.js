@@ -28,17 +28,18 @@
  * to remote computing environments.
  */
 
-YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
-
+(function(Y, M){
     M.block_vcl = {};
 
     M.block_vcl.openAlternatives = [];
 
     M.block_vcl.show_alternatives = function(resid){
-        var e = Y.one("#connAlt_"+resid);
+        var e = Y.one("#connAlt_"+resid),
+            exists = 0,
+            i = 0,
+            newArray = [];
         if(e.hasClass('inactive')){
-            var exists = 0;
-            for(var i=0; i<M.block_vcl.openAlternatives.length; ++i){
+            for(i=0; i<M.block_vcl.openAlternatives.length; i += 1){
                 if (M.block_vcl.openAlternatives[i] == resid){
                     exists = 1;
                 }
@@ -47,8 +48,7 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
                 M.block_vcl.openAlternatives.push(resid);
             }
         } else {
-            var newArray = [];
-            for(var i=0; i<M.block_vcl.openAlternatives.length; ++i){
+            for(i=0; i<M.block_vcl.openAlternatives.length; i += 1){
                 if (M.block_vcl.openAlternatives[i] != resid){
                     newArray.push(M.block_vcl.openAlternatives[i]);
                 }
@@ -61,12 +61,12 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
     };
 
     M.block_vcl.connect = function(username, password, server, requestid, params){
-        var e = document.getElementById("vcl_block_screen_"+requestid);
-        var screen = e.options[e.selectedIndex].value;
+        var e = window.document.getElementById("vcl_block_screen_"+requestid),
+            screen = e.options[e.selectedIndex].value,
+            dim = screen.split(/x/i);
         if(screen == "fullscreen"){
             params += "&fullscreen=yes";
         } else {
-            var dim = screen.split(/x/i);
             if(dim.length == 2){
                 params += "&screenWidth=" + dim[0] + "&screenHeight=" + dim[1];
             }
@@ -74,19 +74,19 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
         window.location = "rdp://" + username + ":" + password + "@" + server + "?" + params;
     };
 
-    M.block_vcl.delete = function(id){
-        Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/images/throbber.gif" class="throbber" />');
+    M.block_vcl.remove = function(id){
+        Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/pix/throbber.gif" class="throbber" />');
         Y.io("/blocks/vcl/ajax.php?action=deleteReservation&id="+id, {
-            on: { complete: function(id, o){
+            on: { complete: function(){
                 M.block_vcl.reservations();
             }}
         });
     };
 
     M.block_vcl.extend = function(id){
-        Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/images/throbber.gif" class="throbber" />');
+        Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/pix/throbber.gif" class="throbber" />');
         Y.io("/blocks/vcl/ajax.php?action=extendReservation&id="+id, {
-            on: { complete: function(id, o){
+            on: { complete: function(){
                 M.block_vcl.reservations();
             }}
         });
@@ -102,36 +102,41 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
         // Get a list of current reservations
         Y.io("/blocks/vcl/ajax.php?action=getReservations", {
             on: { complete: function(id, o){
-                var json = Y.JSON.parse(o.responseText);
-                var timer = 0;
+                var json = Y.JSON.parse(o.responseText),
+                    timer = 0,
+                    html = '',
+                    item = null,
+                    now = new Date(),
+                    selected = {},
+                    ids = M.block_vcl.openAlternatives,
+                    i = 0;
                 if (json.error){
                     Y.one("#vclCurrent").set('innerHTML', json.error);
                 } else {
-                    var html = "";
-                    var now = new Date();
-                    for (var index in json){
-                        html += json[index].html;
-                        if (json[index].status == "loading"){
-                            timer = 5;
-                        } else if (json[index].status == "ready" && !timer){
-                            timer = 30;
-                        } else if (Math.abs(json[index].start - now.getTime() / 1000) < 60 * 10 && !timer){
-                            timer = 30;
+                    for (item in json){
+                        if(json.hasOwnProperty(item)){
+                            html += json[item].html;
+                            if (json[item].status == "loading"){
+                                timer = 5;
+                            } else if (json[item].status == "ready" && !timer){
+                                timer = 30;
+                            } else if (Math.abs(json[item].start - now.getTime() / 1000) < 60 * 10 && !timer){
+                                timer = 30;
+                            }
                         }
                     }
-                    var current = Y.one("#vclCurrent");
-                    if(current.get('innerHTML') != html){
-                        var selected = Array();
-                        current.all("select").each(function(){
+                    if(Y.one('#vclCurrent').get('innerHTML') != html){
+                        Y.one('#vclCurrent').all("select").each(function(){
                             selected[this.get('id')] = this.get('value');
                         });
-                        current.set('innerHTML', html);
-                        for(var id in selected){
-                            Y.one("#" + id).set('value', selected[id]);
+                        Y.one('#vclCurrent').set('innerHTML', html);
+                        for (item in selected){
+                            if (selected.hasOwnProperty(item)){
+                              Y.one("#" + item).set('value', selected[item]);
+                            }
                         }
                     }
-                    var ids = M.block_vcl.openAlternatives;
-                    for(var i=0; i < ids.length; ++i){
+                    for (i=0; i < ids.length; i += 1){
                         M.block_vcl.show_alternatives(ids[i]);
                     }
                     if (timer){
@@ -149,13 +154,16 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
         // Get a list of VCL images
         Y.io("/blocks/vcl/ajax.php?action=getImages", {
             on: { complete: function(id, o){
-                var json = Y.JSON.parse(o.responseText);
+                var json = Y.JSON.parse(o.responseText),
+                    index = null,
+                    html = "";
                 if (json.error){
                     Y.one("#vclNew").set('innerHTML', json.error);
                 } else {
-                    var html = "";
-                    for (var index in json){
-                        html += "<option value=\"" + json[index].id + "\">" + json[index].name + "</option>\n";
+                    for (index in json){
+                        if (json.hasOwnProperty(index)){
+                            html += "<option value=\"" + json[index].id + "\">" + json[index].name + "</option>\n";
+                        }
                     }
                     Y.one("#vclImageList").set('innerHTML', html);
                 }
@@ -168,9 +176,15 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
         M.block_vcl.reservations();
 
         // Initialize calendar
-        var today = new Date();
-        var later = new Date(today.getTime() + 1000*60*60*24*4);
-        var calendar = new YAHOO.widget.Calendar('cal', 'vclCalContainer',
+        var today = new Date(),
+            later = new Date(today.getTime() + 1000*60*60*24*4),
+            hourScale = 5,
+            sliderHour = Y.YUI2.widget.Slider.getHorizSlider("vclTimeContainerHour",
+                         "slider-thumb-hour", 0, 120, 5),
+            minuteScale = 2,
+            sliderMinute = Y.YUI2.widget.Slider.getHorizSlider("vclTimeContainerMinute",
+                         "slider-thumb-minute", 0, 120, 30),
+            calendar = new Y.YUI2.widget.Calendar('cal', 'vclCalContainer',
                             { mindate: today,
                               maxdate: later,
                               hide_blank_weeks: true });
@@ -182,79 +196,83 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
         }, calendar, true);
         calendar.render();
 
-        // Initialize hour slider
-        var hourScale = 5;
-        var sliderHour = YAHOO.widget.Slider.getHorizSlider("vclTimeContainerHour",
-                         "slider-thumb-hour", 0, 120, 5);
         sliderHour.animate = true;
         sliderHour.getRealValue = function() {
             return Math.round(this.getValue() / hourScale);
-        }
-        sliderHour.subscribe("change", function(offsetFromStart) {
-            var fld = Y.one("#vclTime");
-            var actualValue = parseInt(sliderHour.getRealValue());
+        };
+        sliderHour.subscribe("change", function() {
+            var fld = Y.one("#vclTime"),
+                actualValue = parseInt(this.getRealValue(), 10),
+                matches = null,
+                minute = "00";
             // update the text box with the actual value
-            var minute = "00";
             if (fld.get('value')){
-                var matches = fld.get('value').match(/\d{1,2}:(\d{2}) [ap]m/i);
+                matches = fld.get('value').match(/\d{1,2}:(\d{2}) [ap]m/i);
                 if (matches){
                     minute = matches[1];
                 }
             }
-            fld.set('value', (actualValue % 12 ? actualValue % 12 : "12") + ":" + minute + " " + (actualValue % 24 >= 12 ? "pm" : "am"));
-        });
+            fld.set('value', (actualValue % 12 || "12") + ":" + minute + " " + (actualValue % 24 >= 12 ? "pm" : "am"));
+        }, sliderHour, true);
 
-        // Initialize minute slider
-        var minuteScale = 2;
-        var sliderMinute = YAHOO.widget.Slider.getHorizSlider("vclTimeContainerMinute",
-                         "slider-thumb-minute", 0, 120, 30);
         sliderMinute.animate = true;
         sliderMinute.getRealValue = function() {
             return Math.round(this.getValue() / minuteScale);
-        }
+        };
 
-        sliderMinute.subscribe("change", function(offsetFromStart) {
-            var fld = Y.one("#vclTime");
-            var actualValue = parseInt(sliderMinute.getRealValue());
+        sliderMinute.subscribe("change", function() {
+            var fld = Y.one("#vclTime"),
+                actualValue = parseInt(this.getRealValue(), 10),
+                matches = null,
+                hour = "12", ampm = "am";
             // update the text box with the actual value
-            var hour = "12", ampm = "am";
             if (fld.get('value')){
-                var matches = fld.get('value').match(/(\d{1,2}):\d{2} ([ap]m)/i);
+                matches = fld.get('value').match(/(\d{1,2}):\d{2} ([ap]m)/i);
                 if (matches){
                     hour = matches[1];
                     ampm = matches[2];
                 }
             }
-            fld.set('value', hour + ":" + (actualValue % 60 ? actualValue % 60 : "00") + " " + ampm);
-        });
+            fld.set('value', hour + ":" + (actualValue % 60 || "00") + " " + ampm);
+        }, sliderMinute, true);
 
         // Setup event handlers
         Y.one('#vclDate').on('click', function(e){
             e.halt(); // don't propogate events.
             Y.one("#vclTimeContainer").setStyle('display', 'none');
-            var date = e.target.get('value');
-            calendar.cfg.setProperty('selected', date ? date : '');
+            var date = e.target.get('value'),
+                handleCal = Y.one("#vclCalContainer").on('click', function(e){
+                    e.halt(); // also don't propogate click events here.
+                }),
+                handleDoc = Y.one(window.document).on('click', function(){
+                    calendar.hide();
+                    handleDoc.detach();
+                    handleCal.detach();
+                });
+            calendar.cfg.setProperty('selected', date || '');
             calendar.cfg.setProperty('pagedate', date ? new Date(date) : new Date(), true);
             calendar.render();
             Y.one("#vclCalContainer").setStyle('display', 'block');
-            var handleCal = Y.one("#vclCalContainer").on('click', function(e){
-                e.halt(); // also don't propogate click events here.
-            });
-            var handleDoc = Y.one(document).on('click', function(e){
-                calendar.hide();
-                handleDoc.detach();
-                handleCal.detach();
-            });
         });
 
         Y.one('#vclTime').on('click', function(e){
             e.halt(); // don't propogate events.
             calendar.hide();
             Y.one("#vclTimeContainer").setStyle('display', 'block');
-            var matches = e.target.get('value').match(/^(\d{1,2}):(\d{2})\s+([ap]m)/i);
+            var matches = e.target.get('value').match(/^(\d{1,2}):(\d{2})\s+([ap]m)/i),
+                hour = null,
+                minute = null,
+                handleTime = Y.one("#vclTimeContainer").on('click', function(e){
+                    e.halt();
+                }),
+                handleDoc = Y.one(window.document).on('click', function(){
+                    Y.one("#vclTimeContainer").setStyle('display', 'none');
+                    handleDoc.detach();
+                    handleTime.detach();
+                });
             if (matches){
-                var hour = matches[3].toLowerCase() == "pm" ? parseInt(matches[1]) % 12 + 12 : parseInt(matches[1]) % 12;
-                var minute = parseInt(matches[2]) % 60;
+                hour = matches[3].toLowerCase() == "pm" ? parseInt(matches[1], 10) % 12 + 12 : parseInt(matches[1], 10) % 12;
+                minute = parseInt(matches[2], 10) % 60;
                 sliderHour.setValue(hour * hourScale, true, true, true);
                 sliderMinute.setValue(minute * minuteScale, true, true, true);
             } else {
@@ -262,14 +280,6 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
                 sliderMinute.setValue(0, true, true, true);
                 e.target.set('value',"");
             }
-            var handleTime = Y.one("#vclTimeContainer").on('click', function(e){
-                e.halt();
-            });
-            var handleDoc = Y.one(document).on('click', function(e){
-                Y.one("#vclTimeContainer").setStyle('display', 'none');
-                handleDoc.detach();
-                handleTime.detach();
-            });
         });
 
         Y.one('#vclWhen').on("change", function(e){
@@ -281,12 +291,12 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
             }
         });
 
-        Y.one('#vclButton').on("click", function(e){
-            Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/images/throbber.gif" class="throbber" />');
+        Y.one('#vclButton').on("click", function(){
+            Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/pix/throbber.gif" class="throbber" />');
             Y.io("/blocks/vcl/ajax.php", {
                 method: 'POST',
                 form: { id: 'vclReservationForm' },
-                on: { complete: function(id, o){
+                on: { complete: function(){
                     Y.one("#vclTime").set('value',"");
                     M.block_vcl.reservations();
                 }}
@@ -295,4 +305,4 @@ YUI('vcl_block').use('node', 'io', 'io-base', 'json-parse', function (Y){
             M.block_vcl.reset();
         });
     };
-});
+})(Y, M);

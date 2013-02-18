@@ -39,7 +39,8 @@ require_login();
 $vcl = new VCL(
     get_config('block_vcl', 'api'),
     vcl_get_username(),
-    get_config('block_vcl', 'authentication'));
+    get_config('block_vcl', 'authmethod') == 'delegated' ? 
+    get_config('block_vcl', 'authentication') : '');
 
 if (!isset($_REQUEST["action"])){
     exit(0);
@@ -157,7 +158,7 @@ switch($_REQUEST["action"]){
                             if(($r['end'] - $r['start']) / 60 / 60 >= get_config('block_vcl', 'reservationmax'))
                                 $disabled = "disabled=\"disabled\"";
                             $html .= "<input type=\"button\" $disabled title=\"" . get_string('extendby', 'block_vcl') . " " . get_config('block_vcl', 'reservationextension') . " " . get_string('minutes', 'block_vcl') . "\" onclick=\"M.block_vcl.extend('{$r['requestid']}')\" value=\"" . get_string('extend', 'block_vcl') . "\" />\n";
-                            $html .= "<input type=\"button\" title=\"" . get_string('endreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.delete('{$r['requestid']}')\" value=\"" . get_string('end', 'block_vcl') . "\" />\n";
+                            $html .= "<input type=\"button\" title=\"" . get_string('endreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" . get_string('end', 'block_vcl') . "\" />\n";
 
                             $html .= "<br />\n";
                             $html .= get_string('screen', 'block_vcl') . ": ";
@@ -187,24 +188,24 @@ switch($_REQUEST["action"]){
                         case "loading":
                             $html .= "<p>" . get_string('reservationloading', 'block_vcl');
                             $html .= " {$status['time']} " . strtolower(get_string(($status['time'] != 1 ? 'minutes' : 'minute'), 'block_vcl')) . ".</p>\n";
-                            $html .= "<input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.delete('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" />\n";
+                            $html .= "<input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" />\n";
                             break;
 
                         case "future":
                             $html .= strftime("<p>%b %e at %l:%M %p</p>", $r['start']);       
-                            $html .= "<p><input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.delete('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" /></p>\n";
+                            $html .= "<p><input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" /></p>\n";
                             break;
 
                         case "failed":
                             $html .= strftime("<p>%b %e at %l:%M %p</p>", $r['start']);
                             $html .= "<p>" . get_string('reservationfailed', 'block_vcl') . "</p>";
-                            $html .= "<p><input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.delete('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" /></p>\n";
+                            $html .= "<p><input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" /></p>\n";
                             break;
 
                         case "timedout":
                             $html .= strftime("<p>%b %e at %l:%M %p</p>", $r['start']);       
                             $html .= "<p>" . get_string('reservationtimedout', 'block_vcl') . "</p>"; 
-                            $html .= "<p><input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.delete('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" /></p>\n";
+                            $html .= "<p><input type=\"button\" title=\"" . get_string('cancelreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" . get_string('cancel', 'block_vcl') . "\" /></p>\n";
                             break;
                     }
                 }

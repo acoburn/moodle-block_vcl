@@ -68,19 +68,18 @@ class block_vcl extends block_base {
             "fullpath" => "/blocks/vcl/vcl.js",
             "requires" => array('io', 'node', 'yui2-calendar',
                                 'yui2-slider', 'json-parse', 'transition'));       
-        $this->page->requires->js('/blocks/vcl/vcl.js', true);
-        $this->page->requires->js_init_call('M.block_vcl.init', NULL, false, $jsmodule);
+        $PAGE->requires->js_init_call('M.block_vcl.init', NULL, false, $jsmodule);
         
         $this->content->text .= "<div id=\"vcl_block\">\n";
         $this->content->text .= "  <div id=\"vclCurrentReservations\">\n";
         $this->content->text .= "    <h3>" . get_string('currentreservations', 'block_vcl') . "</h3>\n";
         $this->content->text .= "    <div id=\"vclCurrent\">\n";
-        $this->content->text .= "      <img src=\"{$CFG->wwwroot}/blocks/vcl/images/throbber.gif\" class=\"throbber\" />\n";
+        $this->content->text .= "      <img src=\"{$CFG->wwwroot}/blocks/vcl/pix/throbber.gif\" class=\"throbber\" />\n";
         $this->content->text .= "    </div>\n";
         $this->content->text .= "  </div>\n"; 
         $this->content->text .= "  <div id=\"vclScheduleReservation\">\n";
         $this->content->text .= "    <h3>" . get_string('newreservation', 'block_vcl') . "</h3>\n";
-        $this->content->text .= "    <img src=\"{$CFG->wwwroot}/blocks/vcl/images/throbber.gif\" class=\"throbber\" />\n";
+        $this->content->text .= "    <img src=\"{$CFG->wwwroot}/blocks/vcl/pix/throbber.gif\" class=\"throbber\" />\n";
         $this->content->text .= "    <div id=\"vclNew\">\n";
         $this->content->text .= "      <form id=\"vclReservationForm\" method=\"post\" action=\"{$CFG->wwwroot}/blocks/vcl/ajax.php\">\n";
         $this->content->text .= "        <input type=\"hidden\" name=\"action\" value=\"newReservation\" />\n";
@@ -108,7 +107,7 @@ class block_vcl extends block_base {
         $this->content->text .= "                <td>" . get_string('hour', 'block_vcl') . "</td>\n";
         $this->content->text .= "                <td>\n";
         $this->content->text .= "                  <div id=\"vclTimeContainerHour\">\n";
-        $this->content->text .= "                    <div id=\"slider-thumb-hour\"><img src=\"{$CFG->wwwroot}/blocks/vcl/images/slider.gif\"></div>\n";
+        $this->content->text .= "                    <div id=\"slider-thumb-hour\"><img src=\"{$CFG->wwwroot}/blocks/vcl/pix/slider.gif\"></div>\n";
         $this->content->text .= "                  </div>\n";
         $this->content->text .= "                </td>\n";
         $this->content->text .= "              </tr>\n";
@@ -116,7 +115,7 @@ class block_vcl extends block_base {
         $this->content->text .= "                <td>" . get_string('minute', 'block_vcl') . "</td>\n";
         $this->content->text .= "                <td>\n";
         $this->content->text .= "                  <div id=\"vclTimeContainerMinute\">\n";
-        $this->content->text .= "                    <div id=\"slider-thumb-minute\"><img src=\"{$CFG->wwwroot}/blocks/vcl/images/slider.gif\"></div>\n";
+        $this->content->text .= "                    <div id=\"slider-thumb-minute\"><img src=\"{$CFG->wwwroot}/blocks/vcl/pix/slider.gif\"></div>\n";
         $this->content->text .= "                  </div>\n";
         $this->content->text .= "                </td>\n";
         $this->content->text .= "              </tr>\n";
