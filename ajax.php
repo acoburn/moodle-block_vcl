@@ -39,8 +39,7 @@ require_login();
 $vcl = new VCL(
     get_config('block_vcl', 'api'),
     vcl_get_username(),
-    get_config('block_vcl', 'authmethod') == 'delegated' ? 
-    get_config('block_vcl', 'authentication') : '');
+    get_config('block_vcl', 'authentication'));
 
 if (!isset($_REQUEST["action"])){
     exit(0);
