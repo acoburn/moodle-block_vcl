@@ -170,6 +170,14 @@ $settings->add(
     ));
 
 $settings->add(
+    new admin_setting_configcheckbox(
+        'block_vcl/enableautoconnect',
+        get_string('labelenableautoconnect', 'block_vcl'),
+        get_string('descenableautoconnect', 'block_vcl'),
+        0
+    ));
+
+$settings->add(
     new admin_setting_configtext(
         'block_vcl/reservationduration',
         get_string('labelreservationduration', 'block_vcl'),

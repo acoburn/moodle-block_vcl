@@ -90,7 +90,7 @@ switch($_REQUEST["action"]){
                 print "promptcredentialonce:i:1\r\n";
                 print "alternate shell:s:\r\n";
                 print "shell working directory:s:\r\n";
-                print "disable wallpaper:i:1\r\n";
+                print "disable wallpaper:i:0\r\n";
                 print "disable full window drag:i:1\r\n";
                 print "disable menu anims:i:1\r\n";
                 print "disable themes:i:0\r\n";
@@ -150,29 +150,65 @@ switch($_REQUEST["action"]){
                     switch($status['status']){
                         case "ready":
                             $html .= "<p>" . get_string('ready', 'block_vcl') . "<br /> " . floor(($r['end'] - time()) / 60) . " " . get_string('minutesremaining', 'block_vcl') . ".</p>";
+                            $html .= "<p style=\"text-align:center\">";
                             $rc = $vcl->getConnectData($r['requestid'], $_SERVER["REMOTE_ADDR"]);
-                            $params = "forwardDisks=yes&forwardPrinters=yes&forwardSerial=yes&forwardAudio=0&drawDesktop=yes&title={$r['imagename']}";
-                            $html .= "<input type=\"button\" title=\"" . get_string('autoconnect', 'block_vcl') . "\" value=\"" . get_string('connect', 'block_vcl') . "\" onclick=\"M.block_vcl.connect('{$rc['user']}', '{$rc['password']}', '{$rc['serverIP']}', {$r['requestid']}, '{$params}')\" />\n";
-                            // Disable extensions beyond 8 hours.
-                            $disabled = "";
-                            if(($r['end'] - $r['start']) / 60 / 60 >= get_config('block_vcl', 'reservationmax'))
-                                $disabled = "disabled=\"disabled\"";
-                            $html .= "<input type=\"button\" $disabled title=\"" . get_string('extendby', 'block_vcl') . " " . get_config('block_vcl', 'reservationextension') . " " . get_string('minutes', 'block_vcl') . "\" onclick=\"M.block_vcl.extend('{$r['requestid']}')\" value=\"" . get_string('extend', 'block_vcl') . "\" />\n";
-                            $html .= "<input type=\"button\" title=\"" . get_string('endreservation', 'block_vcl') . "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" . get_string('end', 'block_vcl') . "\" />\n";
+                            if (get_config('block_vcl', 'enableautoconnect')){
+                                $params = "forwardDisks=yes&forwardPrinters=yes&" .
+                                          "forwardSerial=yes&forwardAudio=0&" .
+                                          "drawDesktop=yes&title={$r['imagename']}";
+                                $html .= "<input type=\"button\" title=\"" .
+                                         get_string('autoconnect', 'block_vcl') . "\" value=\"" .
+                                         get_string('connect', 'block_vcl') .
+                                         "\" onclick=\"M.block_vcl.connect('{$rc['user']}', '{$rc['password']}', '{$rc['serverIP']}', {$r['requestid']}, '{$params}')\" />\n";
 
-                            $html .= "<br />\n";
-                            $html .= get_string('screen', 'block_vcl') . ": ";
-                            $html .= "<select id=\"vcl_block_screen_{$r['requestid']}\">";
-                            $html .= "<option value=\"fullscreen\">".get_string('fullscreen', 'block_vcl')."</option>";
-                            $html .= "<option value=\"1280x1024\">1280x1024</option>";
-                            $html .= "<option selected=\"selected\" value=\"1024x768\">1024x768</option>";
-                            $html .= "<option value=\"800x600\">800x600</option>";
-                            $html .= "<option value=\"640x480\">640x480</option>";
-                            $html .= "</select>";
-                            $html .= "<br />";
-                            $html .= "<br />";
-                             $html .= "<p><a href=\"#\" id=\"connAlt_{$r['requestid']}\" class=\"inactive\" onclick=\"M.block_vcl.show_alternatives({$r['requestid']});return false;\">".get_string('otherconnections', 'block_vcl') . "</a></p>";
-                            $html .= "<div class=\"alt_connection\">";
+                                // Disable extensions beyond 8 hours.
+                                $disabled = "";
+                                if(($r['end'] - $r['start']) / 60 / 60 >= get_config('block_vcl', 'reservationmax'))
+                                    $disabled = "disabled=\"disabled\"";
+                                $html .= "<input type=\"button\" $disabled title=\"" .
+                                         get_string('extendby', 'block_vcl') . " " .
+                                         get_config('block_vcl', 'reservationextension') . " " .
+                                         get_string('minutes', 'block_vcl') .
+                                         "\" onclick=\"M.block_vcl.extend('{$r['requestid']}')\" value=\"" .
+                                         get_string('extend', 'block_vcl') . "\" />\n";
+                                $html .= "<input type=\"button\" title=\"" .
+                                         get_string('endreservation', 'block_vcl') .
+                                         "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" .
+                                         get_string('end', 'block_vcl') . "\" />\n";
+
+                                $html .= "<br />\n";
+                                $html .= get_string('screen', 'block_vcl') . ": ";
+                                $html .= "<select id=\"vcl_block_screen_{$r['requestid']}\">";
+                                $html .= "<option value=\"fullscreen\">".get_string('fullscreen', 'block_vcl')."</option>";
+                                $html .= "<option value=\"1280x1024\">1280x1024</option>";
+                                $html .= "<option selected=\"selected\" value=\"1024x768\">1024x768</option>";
+                                $html .= "<option value=\"800x600\">800x600</option>";
+                                $html .= "<option value=\"640x480\">640x480</option>";
+                                $html .= "</select>";
+
+                                $html .= "</p>";
+                                $html .= "<br />";
+                                $html .= "<p><a href=\"#\" id=\"connAlt_{$r['requestid']}\" class=\"inactive\" onclick=\"M.block_vcl.show_alternatives({$r['requestid']});return false;\">".get_string('otherconnections', 'block_vcl') . "</a></p>";
+                                $html .= "<div class=\"alt_connection\">";
+                            } else {
+                                // Disable extensions beyond 8 hours.
+                                $disabled = "";
+                                if(($r['end'] - $r['start']) / 60 / 60 >= get_config('block_vcl', 'reservationmax'))
+                                    $disabled = "disabled=\"disabled\"";
+                                $html .= "<input type=\"button\" $disabled title=\"" .
+                                         get_string('extendby', 'block_vcl') . " " .
+                                         get_config('block_vcl', 'reservationextension') . " " .
+                                         get_string('minutes', 'block_vcl') .
+                                         "\" onclick=\"M.block_vcl.extend('{$r['requestid']}')\" value=\"" .
+                                         get_string('extend', 'block_vcl') . "\" />\n";
+                                $html .= "<input type=\"button\" title=\"" .
+                                         get_string('endreservation', 'block_vcl') .
+                                         "\" onclick=\"M.block_vcl.remove('{$r['requestid']}')\" value=\"" .
+                                         get_string('end', 'block_vcl') . "\" />\n";
+
+                                $html .= "</p>";
+                            }
+
                             $html .= "<p style=\"text-align:center\">".get_string('downloadrdp', 'block_vcl').":<br />";
                             $html .= "<input type=\"button\" title=\"" . get_string('downloadrdp', 'block_vcl') . "\" onclick=\"window.location='" . $CFG->wwwroot . $_SERVER['PHP_SELF'] ."?action=connect&amp;id={$r['requestid']}'\" value=\"" . get_string('getrdp', 'block_vcl') . "\" />\n";
                             $html .= "</p>";
@@ -182,7 +218,9 @@ switch($_REQUEST["action"]){
                             $html .= "<b>" . get_string('username', 'block_vcl') . "</b>: ".$rc["user"]."<br />\n";
                             $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
                             $html .= "</p>\n";
-                            $html .= "</div>";
+                            if(get_config('block_vcl', 'enableautoconnect')){
+                                $html .= "</div>";
+                            }
                             break;
 
                         case "loading":
