@@ -479,9 +479,6 @@ class block_vcl extends block_base {
                                 vcl_error("Error removing users from group: {$group}: {$vcl->errmsg}");
                             }
                         }
-                    } else {
-                        mtrace("Removing VCL Course Group: " . $group);
-                        $block->deleteVclGroup();
                     }
                 }
             } else {
