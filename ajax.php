@@ -154,7 +154,6 @@ switch($_REQUEST["action"]){
                             $isRdp = false;
                             $isSsh = false;
                             foreach($rc['connectMethods'] as $cm){
-                                error_log(print_r($cm, 1));
                                 if ($cm['connectport'] == 3389) {
                                     $isRdp = true;
                                 }
