@@ -151,7 +151,18 @@ switch($_REQUEST["action"]){
                             $html .= "<p>" . get_string('ready', 'block_vcl') . "<br /> " . floor(($r['end'] - time()) / 60) . " " . get_string('minutesremaining', 'block_vcl') . ".</p>";
                             $html .= "<p style=\"text-align:center\">";
                             $rc = $vcl->getConnectData($r['requestid'], $_SERVER["REMOTE_ADDR"]);
-                            if (get_config('block_vcl', 'enableautoconnect')){
+                            $isRdp = false;
+                            $isSsh = false;
+                            foreach($rc['connectMethods'] as $cm){
+                                error_log(print_r($cm, 1));
+                                if ($cm['connectport'] == 3389) {
+                                    $isRdp = true;
+                                }
+                                if ($cm['connectport'] == 22) {
+                                    $isSsh = true;
+                                }
+                            }
+                            if ($isRdp && get_config('block_vcl', 'enableautoconnect')){
                                 $params = "forwardDisks=yes&forwardPrinters=yes&" .
                                           "forwardSerial=yes&forwardAudio=0&" .
                                           "drawDesktop=yes&title={$r['imagename']}";
@@ -208,14 +219,29 @@ switch($_REQUEST["action"]){
                                 $html .= "</p>";
                             }
 
-                            $html .= "<p style=\"text-align:center\">".get_string('downloadrdp', 'block_vcl').":<br />";
-                            $html .= "<input type=\"button\" title=\"" . get_string('downloadrdp', 'block_vcl') . "\" onclick=\"window.location='" . $CFG->wwwroot . $_SERVER['PHP_SELF'] ."?action=connect&amp;id={$r['requestid']}'\" value=\"" . get_string('getrdp', 'block_vcl') . "\" />\n";
-                            $html .= "</p>";
+                            if ($isRdp) {
+                                $html .= "<p style=\"text-align:center\">".get_string('downloadrdp', 'block_vcl').":<br />";
+                                $html .= "<input type=\"button\" title=\"" . get_string('downloadrdp', 'block_vcl') . "\" onclick=\"window.location='" . $CFG->wwwroot . $_SERVER['PHP_SELF'] ."?action=connect&amp;id={$r['requestid']}'\" value=\"" . get_string('getrdp', 'block_vcl') . "\" />\n";
+                                $html .= "</p>";
+                            }
+                            
                             $html .= "<p style=\"text-align:center\">";
-                            $html .= get_string('enterrdp', 'block_vcl').":<br />";
-                            $html .= "<b>" . get_string('ipaddress', 'block_vcl') . "</b>: ".$rc["serverIP"]."<br />\n";
-                            $html .= "<b>" . get_string('username', 'block_vcl') . "</b>: ".$rc["user"]."<br />\n";
-                            $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
+                            if ($isRdp) {
+                                $html .= get_string('enterrdp', 'block_vcl').":<br />";
+                                $html .= "<b>" . get_string('ipaddress', 'block_vcl') . "</b>: ".$rc["serverIP"]."<br />\n";
+                                $html .= "<b>" . get_string('username', 'block_vcl') . "</b>: ".$rc["user"]."<br />\n";
+                                $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
+                            } else if ($isSsh) {
+                                $html .= get_string('enterssh', 'block_vcl'). ": <br/>";
+                                $html .= "<br>";
+                                $html .= "<input onclick=\"this.select();return false;\" readonly=\"readonly\" type=\"text\" title=\"SSH Command\" value=\"ssh " . $rc['serverIP'] . " -l " . $rc['user'] . " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null\" style=\"display: block;width: 90%; margin: 0 auto; padding: 3px;\">";
+                                $html .= "<br>";
+                                $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
+                            } else {
+                                $html .= "<b>" . get_string('ipaddress', 'block_vcl') . "</b>: ".$rc["serverIP"]."<br />\n";
+                                $html .= "<b>" . get_string('username', 'block_vcl') . "</b>: ".$rc["user"]."<br />\n";
+                                $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
+                            }
                             $html .= "</p>\n";
                             if(get_config('block_vcl', 'enableautoconnect')){
                                 $html .= "</div>";

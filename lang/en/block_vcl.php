@@ -71,6 +71,7 @@ $string['downloadrdp'] = "Download an RDP file";
 $string['end'] = 'End';
 $string['endreservation'] = "End this reservation";
 $string['enterrdp'] = "Enter the following into an RDP client";
+$string['enterssh'] = "Enter the following into an SSH client";
 $string['extend'] = 'Extend';
 $string['extendby'] = "Extend this reservation by";
 $string['fullscreen'] = "Full Screen";
