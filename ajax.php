@@ -230,15 +230,12 @@ switch($_REQUEST["action"]){
                                 $html .= "<b>" . get_string('ipaddress', 'block_vcl') . "</b>: ".$rc["serverIP"]."<br />\n";
                                 $html .= "<b>" . get_string('username', 'block_vcl') . "</b>: ".$rc["user"]."<br />\n";
                                 $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
-                            } else if ($isSsh) {
+                            }
+                            if ($isSsh) {
                                 $html .= get_string('enterssh', 'block_vcl'). ": <br/>";
                                 $html .= "<br>";
                                 $html .= "<input onclick=\"this.select();return false;\" readonly=\"readonly\" type=\"text\" title=\"SSH Command\" value=\"ssh " . $rc['serverIP'] . " -l " . $rc['user'] . " -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null\" style=\"display: block;width: 90%; margin: 0 auto; padding: 3px;\">";
                                 $html .= "<br>";
-                                $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
-                            } else {
-                                $html .= "<b>" . get_string('ipaddress', 'block_vcl') . "</b>: ".$rc["serverIP"]."<br />\n";
-                                $html .= "<b>" . get_string('username', 'block_vcl') . "</b>: ".$rc["user"]."<br />\n";
                                 $html .= "<b>" . get_string('password', 'block_vcl') . "</b>: ".$rc["password"]."<br />\n";
                             }
                             $html .= "</p>\n";
