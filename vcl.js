@@ -76,7 +76,7 @@
 
     M.block_vcl.remove = function(id){
         Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/pix/throbber.gif" class="throbber" />');
-        Y.io("/blocks/vcl/ajax.php?action=deleteReservation&id="+id, {
+        Y.io(M.cfg.wwwroot + "/blocks/vcl/ajax.php?action=deleteReservation&id="+id, {
             on: { complete: function(){
                 M.block_vcl.reservations();
             }}
@@ -85,7 +85,7 @@
 
     M.block_vcl.extend = function(id){
         Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/pix/throbber.gif" class="throbber" />');
-        Y.io("/blocks/vcl/ajax.php?action=extendReservation&id="+id, {
+        Y.io(M.cfg.wwwroot + "/blocks/vcl/ajax.php?action=extendReservation&id="+id, {
             on: { complete: function(){
                 M.block_vcl.reservations();
             }}
@@ -100,7 +100,7 @@
 
     M.block_vcl.reservations = function(){
         // Get a list of current reservations
-        Y.io("/blocks/vcl/ajax.php?action=getReservations", {
+        Y.io(M.cfg.wwwroot + "/blocks/vcl/ajax.php?action=getReservations", {
             on: { complete: function(id, o){
                 var json = Y.JSON.parse(o.responseText),
                     timer = 0,
@@ -152,7 +152,7 @@
         M.block_vcl.reset();
 
         // Get a list of VCL images
-        Y.io("/blocks/vcl/ajax.php?action=getImages", {
+        Y.io(M.cfg.wwwroot + "/blocks/vcl/ajax.php?action=getImages", {
             on: { complete: function(id, o){
                 var json = Y.JSON.parse(o.responseText),
                     index = null,
@@ -293,7 +293,7 @@
 
         Y.one('#vclButton').on("click", function(){
             Y.one("#vclCurrent").set('innerHTML', '<img src="../blocks/vcl/pix/throbber.gif" class="throbber" />');
-            Y.io("/blocks/vcl/ajax.php", {
+            Y.io(M.cfg.wwwroot + "/blocks/vcl/ajax.php", {
                 method: 'POST',
                 form: { id: 'vclReservationForm' },
                 on: { complete: function(){
